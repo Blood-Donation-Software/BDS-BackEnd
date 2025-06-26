@@ -17,6 +17,7 @@ import java.time.LocalDate;
 public class BlogDto {
     private Long id;
     private Long authorId;
+    private String authorName;
 
     @NotBlank(message = "Title is required")
     @Size(max = 100, message = "Title must not exceed 100 characters")

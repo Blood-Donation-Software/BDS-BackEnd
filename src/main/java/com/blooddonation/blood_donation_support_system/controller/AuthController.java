@@ -108,16 +108,21 @@ public class AuthController {
         return ResponseEntity.ok(result);
     }
 
+@PostMapping("/verify-password-reset")
+    public ResponseEntity<String> verifyPasswordReset(@RequestParam String verificationCode) {
+        try {
+            String result = authService.verifyPasswordReset(verificationCode);
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
     // Reset Password using the code sent to the email
     @PostMapping("/reset-password")
     public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordDto resetPasswordDto) {
         String result = authService.resetPassword(resetPasswordDto.getCode(), resetPasswordDto.getNewPassword());
-        if (result.equals("Reset code invalid") ||
-                result.equals("Reset code expired") ||
-                result.equals("Invalid reset code")) {
-            return ResponseEntity.badRequest().body(result);
-        }
         return ResponseEntity.ok(result);
     }
+
 
 }
