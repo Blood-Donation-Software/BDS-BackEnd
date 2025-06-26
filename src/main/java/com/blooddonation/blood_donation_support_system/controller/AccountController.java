@@ -90,7 +90,7 @@ public class AccountController {
     public ResponseEntity<Object> updateAccountStatus(@PathVariable Long accountId,
                                                       @Valid @RequestBody AccountStatusUpdateDto statusUpdate) {
         try {
-            AccountDto updatedAccount = accountService.updateUserStatus(accountId, statusUpdate.getDonationRegistrationStatus().name());
+            AccountDto updatedAccount = accountService.updateUserStatus(accountId, statusUpdate.getStatus().name());
             return ResponseEntity.ok(updatedAccount);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
