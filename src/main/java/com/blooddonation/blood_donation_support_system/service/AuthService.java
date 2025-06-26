@@ -13,6 +13,8 @@ public interface AuthService {
 
     String initiatePasswordReset(String email);
 
+    String verifyPasswordReset(String resetCode);
+
     String resetPassword(String resetCode, String newPassword);
 
     void cleanupExpiredRegistrations();

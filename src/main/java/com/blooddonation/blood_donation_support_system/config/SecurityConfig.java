@@ -79,7 +79,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/donation-event/**").permitAll()
 
                         
-                        .requestMatchers(("/api/blog/list-blogs/**")).hasRole("ADMIN")
+                        .requestMatchers(("/api/blog/list-blogs/**")).permitAll()
                         .requestMatchers(("/api/blog/my-blogs/**")).hasRole("STAFF")
                         .requestMatchers("/api/blog-request/create", "/api/blog-request/my-requests/**").hasRole("STAFF")
                         .requestMatchers(("/api/blog-request/pending/**")).hasRole("ADMIN")

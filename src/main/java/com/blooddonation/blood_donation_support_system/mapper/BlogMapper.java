@@ -25,6 +25,7 @@ public class BlogMapper {
         return BlogDto.builder()
                 .id(blog.getId())
                 .authorId(blog.getAuthor().getId())
+                .authorName(blog.getAuthor().getProfile().getName())
                 .title(blog.getTitle())
                 .content(blog.getContent())
                 .thumbnail(blog.getThumbnail())
