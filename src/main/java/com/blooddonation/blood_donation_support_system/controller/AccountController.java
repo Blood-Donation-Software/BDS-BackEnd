@@ -97,6 +97,16 @@ public class AccountController {
         }
     }
 
+    @PostMapping("list-account/create")
+    public ResponseEntity<Object> createAccount(@Valid @RequestBody AccountDto accountDto) {
+        try {
+            String result = accountService.createAccount(accountDto);
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
     // Show specific account
     @GetMapping("list-account/{accountId}")
     public ResponseEntity<Object> getAccountById(@PathVariable Long accountId) {

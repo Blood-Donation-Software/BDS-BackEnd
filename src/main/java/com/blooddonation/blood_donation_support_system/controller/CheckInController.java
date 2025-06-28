@@ -23,7 +23,8 @@ public class CheckInController {
     @Autowired
     private JwtUtil jwtUtil;
     @Autowired
-    private CheckinTokenService checkinTokenService;    @GetMapping("/{eventId}/qr-code")
+    private CheckinTokenService checkinTokenService;
+    @GetMapping("/{eventId}/qr-code")
     public ResponseEntity<Object> getUserQRCode(
             @PathVariable Long eventId,
             @CookieValue("jwt-token") String token) {
@@ -47,7 +48,7 @@ public class CheckInController {
             @CookieValue("jwt-token") String token) {
         try {
             AccountDto accountDto = jwtUtil.extractUser(token);
-            String checkinToken = checkinTokenService.generateTokenForUser(eventId, accountDto.getEmail());
+            String checkinToken = checkinTokenService.getTokenForUser(eventId, accountDto.getEmail());
             return ResponseEntity.ok().body(Map.of("checkinToken", checkinToken));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -64,6 +65,22 @@ public class CheckInController {
         try {
             AccountDto accountDto = jwtUtil.extractUser(token);
             ProfileWithFormResponseDto profileDto = checkinTokenService.getProfileFromToken(checkinToken, accountDto.getEmail(), eventId);
+            return ResponseEntity.ok(profileDto);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while retrieving user information");
+        }
+    }
+
+    @GetMapping("/info/id/{eventId}")
+    public ResponseEntity<Object> checkinInfoWithPersonalId(@PathVariable Long eventId,
+                                              @RequestParam String personalId,
+                                              @CookieValue("jwt-token") String token) {
+        try {
+            AccountDto accountDto = jwtUtil.extractUser(token);
+            ProfileWithFormResponseDto profileDto = checkinTokenService.checkinInfoWithPersonalId(personalId, eventId);
             return ResponseEntity.ok(profileDto);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
