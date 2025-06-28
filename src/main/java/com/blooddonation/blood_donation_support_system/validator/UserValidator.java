@@ -7,6 +7,7 @@ import com.blooddonation.blood_donation_support_system.entity.Profile;
 import com.blooddonation.blood_donation_support_system.enums.AccountStatus;
 import com.blooddonation.blood_donation_support_system.repository.AccountRepository;
 import com.blooddonation.blood_donation_support_system.repository.BlogRepository;
+import com.blooddonation.blood_donation_support_system.repository.ProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,8 @@ public class UserValidator {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private BlogRepository blogRepository;
+    @Autowired
+    private ProfileRepository profileRepository;
 
     public Account getUserOrThrow(Long id) {
         Account account = accountRepository.findById(id)
@@ -30,6 +33,12 @@ public class UserValidator {
         if (profile == null) {
             throw new RuntimeException("Profile not found for account");
         }
+        return profile;
+    }
+
+    public Profile getProfileOrThrow(Long id) {
+        Profile profile = profileRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Profile not found"));
         return profile;
     }
 

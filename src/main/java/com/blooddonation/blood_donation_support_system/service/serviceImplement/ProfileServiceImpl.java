@@ -68,6 +68,12 @@ public class ProfileServiceImpl implements ProfileService {
         return ProfileMapper.toDto(profile);
     }
 
+    @Override
+    public ProfileDto getProfileByProfileId(Long profileId) {
+        Profile profile = validator.getProfileOrThrow(profileId);
+        return ProfileMapper.toDto(profile);
+    }
+
     public ProfileDto getProfileByPersonalId(String personalId) {
         Profile profile = profileRepository.findByPersonalId(personalId)
                 .orElseThrow(() -> new RuntimeException("Profile not found with personal ID: " + personalId));

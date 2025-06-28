@@ -13,6 +13,7 @@ import java.util.Optional;
 @Repository
 public interface ProfileRepository extends JpaRepository<Profile, Long> {
     Optional<Profile> findByPersonalId(String personalId);
+    Optional<Profile> findById(String id);
     Optional<Profile> findFirstByPersonalId(String personalId);
     List<Profile> findByNextEligibleDonationDateLessThanEqual(LocalDate date);
 }

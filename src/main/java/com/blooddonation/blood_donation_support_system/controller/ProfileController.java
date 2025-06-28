@@ -92,6 +92,19 @@ public class ProfileController {
         }
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Object> getProfileByProfileId(@PathVariable Long id) {
+        try {
+            ProfileDto profileDto = profileService.getProfileByProfileId(id);
+            return ResponseEntity.ok(profileDto);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while retrieving user profile by profile id");
+        }
+    }
+
     // Show a list of all profiles
     @GetMapping("/list-profile")
     public ResponseEntity<Page<ProfileDto>> getProfileList(@RequestParam(defaultValue = "0") int page,
