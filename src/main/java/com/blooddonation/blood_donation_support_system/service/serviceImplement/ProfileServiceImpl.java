@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProfileServiceImpl implements ProfileService {
@@ -96,6 +97,18 @@ public class ProfileServiceImpl implements ProfileService {
         Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
         return profileRepository.findAll(pageable).map(ProfileMapper::toDto);
+    }
+
+    @Override
+    public String createProfile(ProfileDto profileDto) {
+        Optional<Profile> existingProfile = profileRepository.findByPersonalId(profileDto.getPersonalId());
+        if (existingProfile.isPresent()) {
+            throw new RuntimeException("Profile with this Personal ID already exists");
+        }
+        profileDto.setNextEligibleDonationDate(profileDto.getLastDonationDate());
+        Profile profile = ProfileMapper.toEntity(profileDto);
+        profileRepository.save(profile);
+        return "Profile created successfully";
     }
 
     @Scheduled(cron = "0 0 0 * * *") // Runs daily at 00:00

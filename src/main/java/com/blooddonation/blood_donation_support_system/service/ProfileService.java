@@ -14,5 +14,7 @@ public interface ProfileService {
 
     Page<ProfileDto> getAllProfiles(int pageNumber, int pageSize, String sortBy, boolean ascending);
 
+    String createProfile(ProfileDto profileDto);
+
     void notifyEligibleDonors();
 }

@@ -44,7 +44,8 @@ public class ProfileMapper {
                 .gender(profileDto.getGender())
                 .dateOfBirth(profileDto.getDateOfBirth())
                 .lastDonationDate(profileDto.getLastDonationDate())
-                .nextEligibleDonationDate(profileDto.getNextEligibleDonationDate())
+                .nextEligibleDonationDate(profileDto.getNextEligibleDonationDate() == null ? profileDto.getLastDonationDate() : profileDto.getNextEligibleDonationDate())
+                .status(profileDto.getStatus())
                 .personalId(profileDto.getPersonalId())
                 .build();
     }

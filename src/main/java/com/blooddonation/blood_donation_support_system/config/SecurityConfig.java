@@ -65,7 +65,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/user/account/list-account", "/api/user/account/{accountId}/role", "/api/user/account/{accountId}/status", "/api/user/account/list-account/{accountId}").hasRole("ADMIN")
                         .requestMatchers("/api/user/account/**").hasAnyRole("MEMBER", "ADMIN", "STAFF")
-                        .requestMatchers("/api/user/profile/list-profile/{accountId}", "/api/user/profile/list-profile", "/api/user/profile/list-profile/{accountId}/history").hasRole("ADMIN")
+                        .requestMatchers("/api/user/profile/list-profile/{accountId}", "/api/user/profile/list-profile", "/api/user/profile/list-profile/{accountId}/history", "/api/user/profile/create").hasRole("ADMIN")
                         .requestMatchers("/api/user/profile/**").hasAnyRole("MEMBER", "ADMIN", "STAFF")
                         .requestMatchers("/api/checkin/{eventId}/qr-code").hasAnyRole("ADMIN", "STAFF")
                         .requestMatchers("/api/checkin/info/{eventId}","/api/checkin/action/{eventId}").hasRole("STAFF")

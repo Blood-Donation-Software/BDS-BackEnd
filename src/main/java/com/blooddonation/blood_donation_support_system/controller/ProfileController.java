@@ -44,6 +44,19 @@ public class ProfileController {
         }
     }
 
+    @PostMapping("/create")
+    public ResponseEntity<Object> create(@Valid @RequestBody ProfileDto profileDto) {
+        try {
+            String result = profileService.createProfile(profileDto);
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            return  ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while creating new profile");
+        }
+    }
+
     // Get User Profile Info
     @GetMapping()
     public ResponseEntity<Object> profile(@CookieValue(value = "jwt-token") String jwtToken) {
