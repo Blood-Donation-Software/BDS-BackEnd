@@ -59,6 +59,20 @@ public class ProfileController {
         }
     }
 
+    //Get profile by personal id
+    @GetMapping("/{personalId}")
+    public ResponseEntity<Object> getProfileByPersonalId(@PathVariable String personalId) {
+        try {
+            ProfileDto profileDto = profileService.getProfileByPersonalId(personalId);
+            return ResponseEntity.ok(profileDto);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while retrieving user profile by personal id");
+        }
+    }
+
     // Show member history
     @GetMapping("/history")
     public ResponseEntity<Page<UserDonationHistoryDto>> history(
