@@ -10,6 +10,8 @@ public interface ProfileService {
 
     ProfileDto getProfileById(Long accountId);
 
+    ProfileDto getProfileByPersonalId(String personalId);
+
     Page<UserDonationHistoryDto> getDonationHistory(long accountId, int pageNumber, int pageSize, String sortBy, boolean ascending);
 
     Page<ProfileDto> getAllProfiles(int pageNumber, int pageSize, String sortBy, boolean ascending);

@@ -10,5 +10,6 @@ import com.blooddonation.blood_donation_support_system.entity.Profile;
 public interface CheckinTokenService {
     CheckinTokenDto generateTokenForProfile(Profile profile, DonationEvent event);
     ProfileWithFormResponseDto getProfileFromToken(String token, String email, Long eventId);
-    String generateTokenForUser(Long eventId, String email);
+    ProfileWithFormResponseDto checkinInfoWithPersonalId(String personalId, Long eventId);
+    String getTokenForUser(Long eventId, String email);
 }
