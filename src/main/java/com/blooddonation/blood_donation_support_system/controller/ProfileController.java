@@ -44,12 +44,25 @@ public class ProfileController {
         }
     }
 
+    @PostMapping("/create")
+    public ResponseEntity<Object> create(@Valid @RequestBody ProfileDto profileDto) {
+        try {
+            String result = profileService.createProfile(profileDto);
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            return  ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while creating new profile");
+        }
+    }
+
     // Get User Profile Info
     @GetMapping()
     public ResponseEntity<Object> profile(@CookieValue(value = "jwt-token") String jwtToken) {
         try {
             AccountDto accountDto = jwtUtil.extractUser(jwtToken);
-            ProfileDto profileDto = profileService.getProfileById(accountDto.getId());
+            ProfileDto profileDto = profileService.getProfileByAccountId(accountDto.getId());
             return ResponseEntity.ok(profileDto);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -79,16 +92,30 @@ public class ProfileController {
     }
 
     // Show the specific account
-    @GetMapping("/list-profile/{accountId}")
-    public ResponseEntity<Object> getProfileById(@PathVariable Long accountId) {
+    @GetMapping("/list-profile/{profileId}")
+    public ResponseEntity<Object> getProfileById(@PathVariable Long profileId) {
         try {
-            ProfileDto profileDto = profileService.getProfileById(accountId);
+            ProfileDto profileDto = profileService.getProfileByProfileId(profileId);
             return ResponseEntity.ok(profileDto);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("An error occurred while retrieving user profile by email");
+        }
+    }
+
+    @PostMapping("/list-profile/{profileId}/update")
+    public ResponseEntity<Object> updateProfile(@PathVariable Long profileId,
+                                                @Valid @RequestBody ProfileDto profileDto) {
+        try {
+        ProfileDto profileDtoUpdated = profileService.updateProfile(profileId, profileDto);
+        return ResponseEntity.ok(profileDtoUpdated);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while updating user information");
         }
     }
 
@@ -103,7 +130,7 @@ public class ProfileController {
     }
 
     // Show history of specific account
-    @GetMapping("/list-profile/{accountId}/history")
+    @GetMapping("/list-profile/accountId/{accountId}/history")
     public ResponseEntity<Page<UserDonationHistoryDto>> getHistoryById(
             @PathVariable Long accountId,
             @RequestParam(defaultValue = "0") int page,
@@ -112,6 +139,24 @@ public class ProfileController {
             @RequestParam(defaultValue = "true") boolean ascending) {
         try {
             Page<UserDonationHistoryDto> history = profileService.getDonationHistory(accountId, page, size, sortBy, ascending);
+            return ResponseEntity.ok(history);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    // Show history of specific profile
+    @GetMapping("/list-profile/profileId/{profileId}/history")
+    public ResponseEntity<Page<UserDonationHistoryDto>> getHistoryByProfileId(
+            @PathVariable Long profileId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "true") boolean ascending) {
+        try {
+            Page<UserDonationHistoryDto> history = profileService.getDonationHistoryByProfileId(profileId, page, size, sortBy, ascending);
             return ResponseEntity.ok(history);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
