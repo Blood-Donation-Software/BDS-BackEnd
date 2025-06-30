@@ -19,6 +19,7 @@ public interface EventRegistrationRepository extends JpaRepository<EventRegistra
     boolean existsByAccountAndEvent(Account account, DonationEvent event);
     Optional<EventRegistration> findByAccountAndEventAndStatus(Account account, DonationEvent event, DonationRegistrationStatus donationRegistrationStatus);
     Page<EventRegistration> findByAccount(Account account, Pageable pageable);
+    Page<EventRegistration> findByProfileId(Profile profileId, Pageable pageable);
     Page<EventRegistration> findByEventIdAndStatusNot(Long eventId, DonationRegistrationStatus donationRegistrationStatus, Pageable pageable);
     Optional<EventRegistration> findByAccountAndEvent(Account account, DonationEvent event);
 }

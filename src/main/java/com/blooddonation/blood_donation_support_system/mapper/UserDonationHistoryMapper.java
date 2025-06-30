@@ -25,7 +25,9 @@ public class UserDonationHistoryMapper {
         DonationEvent donationEvent = eventRegistration.getEvent();
         Account account = eventRegistration.getAccount();
         BloodUnit bloodUnit = bloodUnitRepository.findByDonorIdAndEvent_Id(account.getId(), donationEvent.getId());
-
+        if (bloodUnit == null) {
+            bloodUnit = bloodUnitRepository.findByProfileIdAndEvent_Id(eventRegistration.getProfileId(), donationEvent.getId());
+        };
         return UserDonationHistoryDto.builder()
                 .registrationId(eventRegistration.getId())
                 .registrationDate(eventRegistration.getRegistrationDate())
@@ -39,6 +41,7 @@ public class UserDonationHistoryMapper {
                 .donationName(donationEvent.getName())
                 .donationVolume(bloodUnit != null ? bloodUnit.getVolume() : null)
                 .accountId(account.getId())
+                .profileId(eventRegistration.getProfileId().getId())
                 .build();
     }
 
