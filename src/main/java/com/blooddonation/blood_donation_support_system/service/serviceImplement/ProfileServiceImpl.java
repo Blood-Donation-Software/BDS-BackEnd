@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProfileServiceImpl implements ProfileService {
@@ -62,10 +63,28 @@ public class ProfileServiceImpl implements ProfileService {
         return ProfileMapper.toDto(updatedProfile);
     }
 
-    public ProfileDto getProfileById(Long accountId) {
+    public ProfileDto getProfileByAccountId(Long accountId) {
         Account account = validator.getUserOrThrow(accountId);
         Profile profile = validator.getProfileOrThrow(account.getProfile());
         return ProfileMapper.toDto(profile);
+    }
+
+    public ProfileDto getProfileByProfileId(Long profileId) {
+        Profile profile = validator.getProfileOrThrowById(profileId);
+        return ProfileMapper.toDto(profile);
+    }
+
+    public ProfileDto updateProfile(Long profileId, ProfileDto profileDto) {
+        Profile profile = validator.getProfileOrThrowById(profileId);
+        if (profile.getPersonalId() == null || !profile.getPersonalId().equals(profileDto.getPersonalId())) {
+            profileRepository.findByPersonalId(profileDto.getPersonalId())
+                    .ifPresent(existingProfile -> {
+                        throw new RuntimeException("Personal ID already exists");
+                    });
+        }
+        ProfileMapper.updateEntityFromDto(profile, profileDto);
+        Profile updatedProfile = profileRepository.save(profile);
+        return ProfileMapper.toDto(updatedProfile);
     }
 
     public ProfileDto getProfileByPersonalId(String personalId) {
@@ -92,10 +111,30 @@ public class ProfileServiceImpl implements ProfileService {
         return eventRegistrationRepository.findByAccount(account, pageable).map(userDonationHistoryMapper::toDto);
     }
 
+    @Transactional
+    public Page<UserDonationHistoryDto> getDonationHistoryByProfileId(long profileId, int pageNumber, int pageSize, String sortBy, boolean ascending) {
+        Profile profile = validator.getProfileOrThrowById(profileId);
+        Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+        return eventRegistrationRepository.findByProfileId(profile, pageable).map(userDonationHistoryMapper::toDto);
+    }
+
     public Page<ProfileDto> getAllProfiles(int pageNumber, int pageSize, String sortBy, boolean ascending) {
         Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
         return profileRepository.findAll(pageable).map(ProfileMapper::toDto);
+    }
+
+    @Override
+    public String createProfile(ProfileDto profileDto) {
+        Optional<Profile> existingProfile = profileRepository.findByPersonalId(profileDto.getPersonalId());
+        if (existingProfile.isPresent()) {
+            throw new RuntimeException("Profile with this Personal ID already exists");
+        }
+        profileDto.setNextEligibleDonationDate(profileDto.getLastDonationDate());
+        Profile profile = ProfileMapper.toEntity(profileDto);
+        profileRepository.save(profile);
+        return "Profile created successfully";
     }
 
     @Scheduled(cron = "0 0 0 * * *") // Runs daily at 00:00

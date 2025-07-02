@@ -21,7 +21,7 @@ public class BloodUnitMapper {
                 .componentType(entity.getComponentType())
                 .volume(entity.getVolume())
                 .status(entity.getStatus())
-                .bloodRequestId(entity.getBloodRequest().getId())
+//                .bloodRequestId(entity.getBloodRequest().getId())
                 .profileId(entity.getProfileId().getId())
                 .build();
     }
