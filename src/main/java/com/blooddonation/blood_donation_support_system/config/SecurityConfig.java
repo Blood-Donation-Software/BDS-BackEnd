@@ -79,11 +79,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/donation-event/**").permitAll()
 
                         
-                        .requestMatchers(("/api/blog/list-blogs/**")).permitAll()
-                        .requestMatchers(("/api/blog/my-blogs/**")).hasRole("STAFF")
+                        .requestMatchers("/api/blog/list-blogs/**").permitAll()
+                        .requestMatchers("/api/blog/my-blogs/**").hasRole("STAFF")
                         .requestMatchers("/api/blog-request/create", "/api/blog-request/my-requests/**").hasRole("STAFF")
-                        .requestMatchers(("/api/blog-request/pending/**")).hasRole("ADMIN")
+                        .requestMatchers("/api/blog-request/pending/**").hasRole("ADMIN")
                         .requestMatchers("/api/medical-facility-stock/**").hasAnyRole("STAFF", "ADMIN")
+                        .requestMatchers("/api/blood-unit/list-unit").hasAnyRole("STAFF", "ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
