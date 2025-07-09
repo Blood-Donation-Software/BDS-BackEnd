@@ -27,4 +27,9 @@ public class MedicalFacilityStockValidator {
         return donationEventRepository.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("Donation event not found with id: " + eventId));
     }
+
+    public BloodUnit getBloodUnitOrThrow(Long id) {
+        return bloodUnitRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Blood Unit not found with id: " + id));
+    }
 }

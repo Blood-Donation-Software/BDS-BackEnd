@@ -8,11 +8,19 @@ import org.springframework.data.domain.Page;
 public interface ProfileService {
     ProfileDto updateUser(AccountDto accountDto, ProfileDto profileDto);
 
-    ProfileDto getProfileById(Long accountId);
+    ProfileDto getProfileByAccountId(Long accountId);
+
+    ProfileDto getProfileByProfileId(Long profileId);
+
+    ProfileDto updateProfile(Long profileId, ProfileDto profileDto);
 
     Page<UserDonationHistoryDto> getDonationHistory(long accountId, int pageNumber, int pageSize, String sortBy, boolean ascending);
 
+    Page<UserDonationHistoryDto> getDonationHistoryByProfileId(long profileId, int pageNumber, int pageSize, String sortBy, boolean ascending);
+
     Page<ProfileDto> getAllProfiles(int pageNumber, int pageSize, String sortBy, boolean ascending);
+
+    String createProfile(ProfileDto profileDto);
 
     void notifyEligibleDonors();
 }
