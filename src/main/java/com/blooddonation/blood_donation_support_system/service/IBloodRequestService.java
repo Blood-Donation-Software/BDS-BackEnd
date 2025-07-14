@@ -10,7 +10,6 @@ import java.util.List;
 @Component
 public interface IBloodRequestService {
     BloodRequestDto createBloodRequest(BloodRequestDto bloodRequestDto);
-    List<BloodRequestDto> findBloodRequestByName(String name);
     List<BloodRequestDto> findAllBloodRequest();
     BloodRequestDto findBloodRequestById(int id);
     BloodRequestDto addBloodRequestDonor(BloodRequestDto bloodRequestDto, BloodUnitDto bloodUnitDto, ProfileDto profileDto);

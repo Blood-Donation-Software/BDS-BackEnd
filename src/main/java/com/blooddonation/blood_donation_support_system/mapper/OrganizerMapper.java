@@ -4,7 +4,6 @@ import com.blooddonation.blood_donation_support_system.dto.OrganizerDto;
 import com.blooddonation.blood_donation_support_system.entity.Account;
 import com.blooddonation.blood_donation_support_system.entity.Organizer;
 import com.blooddonation.blood_donation_support_system.enums.AccountStatus;
-import com.blooddonation.blood_donation_support_system.enums.DonationEventStatus;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -31,11 +30,6 @@ public class OrganizerMapper {
                 .createdBy(organizer.getCreatedBy() != null ? organizer.getCreatedBy().getId() : null)
                 .createdDate(organizer.getCreatedDate())
                 .updatedDate(organizer.getUpdatedDate())
-                .totalEventsOrganized(organizer.getDonationEvents() != null ? organizer.getDonationEvents().size() : 0)
-                .activeEventsCount(organizer.getDonationEvents() != null ? 
-                    (int) organizer.getDonationEvents().stream()
-                        .filter(event -> event.getStatus() == DonationEventStatus.AVAILABLE)
-                        .count() : 0)
                 .build();
     }
 

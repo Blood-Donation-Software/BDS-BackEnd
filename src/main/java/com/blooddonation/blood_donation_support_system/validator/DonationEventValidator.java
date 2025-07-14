@@ -89,7 +89,7 @@ public class DonationEventValidator {
     }
 
     public void validateCorrectAuthor(Account account, DonationEvent event) {
-        if (!account.equals(event.getAccount())) {
+        if (event != null && !account.equals(event.getAccount())) {
             throw new RuntimeException("You don't have the right to edit this event");
         }
     }

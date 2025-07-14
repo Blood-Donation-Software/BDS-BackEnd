@@ -81,6 +81,13 @@ public class DonationEventServiceImpl implements DonationEventService {
         return page.map(DonationEventMapper::toDto);
     }
 
+    @Override
+    public List<DonationEventDto> getOngoingDonationEvents() {
+        return donationEventRepository.findAllByDonationDate(LocalDate.now()).stream()
+                .map(DonationEventMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
 
     @Transactional
     public String recordMultipleBloodDonations(Long eventId, List<SingleBloodUnitRecordDto> records, String userEmail) {

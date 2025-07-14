@@ -42,7 +42,12 @@ public class CheckinTokenServiceImpl implements CheckinTokenService {    @Autowi
         checkinTokenRepository.save(token);
         return CheckinTokenMapper.toDto(token);
     }
-
+    @Transactional
+    public void deleteToken(String token) {
+        CheckinToken checkinToken = checkinTokenRepository.findByToken(token)
+                .orElseThrow(() -> new RuntimeException("Token not found"));
+        checkinTokenRepository.delete(checkinToken);
+    }
     @Override
     @Transactional
     public ProfileWithFormResponseDto getProfileFromToken(String token, String email, Long eventId) {
@@ -55,7 +60,7 @@ public class CheckinTokenServiceImpl implements CheckinTokenService {    @Autowi
         }        Profile profile = checkinToken.getProfile();
         EventRegistration eventRegistration = validator.getRegistrationOrThrow(profile.getPersonalId(), donationEvent);
         String jsonForm = eventRegistration.getJsonForm();
-        
+        deleteToken(token);
         return new ProfileWithFormResponseDto(ProfileMapper.toDto(profile), jsonForm, eventRegistration.getStatus());// Convert to DTO
     }    @Override
     public String generateTokenForUser(Long eventId, String email) {

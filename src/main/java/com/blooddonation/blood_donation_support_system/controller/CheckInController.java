@@ -23,7 +23,8 @@ public class CheckInController {
     @Autowired
     private JwtUtil jwtUtil;
     @Autowired
-    private CheckinTokenService checkinTokenService;    @GetMapping("/{eventId}/qr-code")
+    private CheckinTokenService checkinTokenService;
+    @GetMapping("/{eventId}/qr-code")
     public ResponseEntity<Object> getUserQRCode(
             @PathVariable Long eventId,
             @CookieValue("jwt-token") String token) {

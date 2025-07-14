@@ -65,10 +65,10 @@ public class BlogRequestServiceImpl implements BlogRequestService {
     public String createBlogRequest(BlogDto blogDto, MultipartFile thumbnail, String staffEmail) {
         Account staff = accountRepository.findByEmail(staffEmail);
         try {
-            String thumbnailName = UUID.randomUUID() + "_" + thumbnail.getOriginalFilename();
+            String thumbnailName = UUID.randomUUID() + "_thumbnail";
             Path thumbnailPath = Paths.get(uploadDir, thumbnailName);
             Files.copy(thumbnail.getInputStream(), thumbnailPath, StandardCopyOption.REPLACE_EXISTING);
-            blogDto.setThumbnail("/uploads/" + thumbnailName);
+            blogDto.setThumbnail(uploadDir + "/" + thumbnailName);
 
             BlogRequest blogRequest = BlogRequestMapper.createBlog(blogDto, staff);
             blogRequestRepository.save(blogRequest);
@@ -91,7 +91,7 @@ public class BlogRequestServiceImpl implements BlogRequestService {
                 String thumbnailName = UUID.randomUUID() + "_" + thumbnail.getOriginalFilename();
                 Path thumbnailPath = Paths.get(uploadDir, thumbnailName);
                 Files.copy(thumbnail.getInputStream(), thumbnailPath, StandardCopyOption.REPLACE_EXISTING);
-                blogDto.setThumbnail("/uploads/" + thumbnailName);
+                blogDto.setThumbnail(uploadDir + thumbnailName);
             }
 
             BlogRequest blogRequest = BlogRequestMapper.updateBlog(blogDto, staff, blog);
@@ -171,7 +171,7 @@ public class BlogRequestServiceImpl implements BlogRequestService {
             // Handle content images cleanup
             String oldThumbnail = blog.getThumbnail();
             if (oldThumbnail != null) {
-                Path oldThumbnailPath = Paths.get(uploadDir, oldThumbnail.replace("/uploads/", ""));
+                Path oldThumbnailPath = Paths.get(uploadDir, oldThumbnail.replace(uploadDir, ""));
                 Files.deleteIfExists(oldThumbnailPath);
             }
         } catch (IOException e) {
@@ -186,7 +186,7 @@ public class BlogRequestServiceImpl implements BlogRequestService {
                 .filter(img -> !newImages.contains(img))
                 .forEach(img -> {
                     try {
-                        Path imagePath = Paths.get(uploadDir, img.replace("/uploads/", ""));
+                        Path imagePath = Paths.get(uploadDir, img.replace(uploadDir, ""));
                         Files.deleteIfExists(imagePath);
                     } catch (IOException e) {
                         log.warn("Failed to delete old image: " + img);
@@ -218,7 +218,7 @@ public class BlogRequestServiceImpl implements BlogRequestService {
         if (content == null) return new HashSet<>();
 
         Set<String> urls = new HashSet<>();
-        Pattern pattern = Pattern.compile("/uploads/[^\\s\"']+\\.(jpg|jpeg|png|gif)");
+        Pattern pattern = Pattern.compile( uploadDir + "/[^\\s\"']+\\.(jpg|jpeg|png|gif)");
         Matcher matcher = pattern.matcher(content);
 
         while (matcher.find()) {
@@ -229,7 +229,7 @@ public class BlogRequestServiceImpl implements BlogRequestService {
 
     private void deleteFile(String filePath) {
         try {
-            Path path = Paths.get(uploadDir, filePath.replace("/uploads/", ""));
+            Path path = Paths.get(uploadDir, filePath.replace(uploadDir, ""));
             Files.deleteIfExists(path);
         } catch (IOException e) {
             log.warn("Failed to delete file: " + filePath, e);

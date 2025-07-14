@@ -10,10 +10,6 @@ import java.util.List;
 @Repository
 public interface BloodRequestRepository extends JpaRepository<BloodRequest, Long> {
 
-    BloodRequest findByName(String name);
-
-    List<BloodRequest> findAllByName(String name);
-
     BloodRequest findById(int id);
 
     @Query("SELECT br FROM BloodRequest br LEFT JOIN FETCH br.componentRequests")

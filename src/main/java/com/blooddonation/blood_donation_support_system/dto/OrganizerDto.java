@@ -30,7 +30,5 @@ public class OrganizerDto {
     private Long createdBy;
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
-    private Integer totalEventsOrganized;
-    private Integer activeEventsCount;
 }
 

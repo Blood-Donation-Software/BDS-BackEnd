@@ -68,20 +68,20 @@ public class SecurityConfig {
                         .requestMatchers("/api/user/profile/list-profile/{accountId}", "/api/user/profile/list-profile", "/api/user/profile/list-profile/{accountId}/history").hasRole("ADMIN")
                         .requestMatchers("/api/user/profile/**").hasAnyRole("MEMBER", "ADMIN", "STAFF")
                         .requestMatchers("/api/checkin/{eventId}/qr-code").hasAnyRole("ADMIN", "STAFF")
-                        .requestMatchers("/api/checkin/info/{eventId}","/api/checkin/action/{eventId}").hasRole("STAFF")
+                        .requestMatchers("/api/checkin/info/{eventId}","/api/checkin/action/{eventId}").hasAnyRole("STAFF", "ADMIN")
                         .requestMatchers("/api/event-registration/{eventId}/registerOffline", "/api/event-registration/{eventId}/register-guest").hasRole("STAFF")
                         .requestMatchers("/api/event-registration/**").hasAnyRole("MEMBER", "ADMIN", "STAFF")
                         .requestMatchers("/api/donation-event-request/pending/**").hasRole("ADMIN")
                         .requestMatchers("/api/donation-event-request/**").hasAnyRole("STAFF", "ADMIN")
-                        .requestMatchers("/api/donation-event/create", "/api/donation-event/list-donation/{eventId}/record-donations", "/api/donation-event/list-donation/{eventId}/time-slots/{timeSlotId}/donors", "/api/donation-event/list-donation/{eventId}/donors").hasRole("STAFF")
+                        .requestMatchers("/api/donation-event/create", "/api/donation-event/list-donation/{eventId}/record-donations", "/api/donation-event/list-donation/{eventId}/time-slots/{timeSlotId}/donors", "/api/donation-event/list-donation/{eventId}/donors").hasAnyRole("STAFF", "ADMIN")
                         .requestMatchers("/api/donation-event/list-donation/{eventId}/status").hasRole("ADMIN")
                         .requestMatchers("/api/donation-event/my-donations/**").hasRole("STAFF")
                         .requestMatchers("/api/donation-event/**").permitAll()
 
                         
-                        .requestMatchers(("/api/blog/list-blogs/**")).hasRole("ADMIN")
+                        .requestMatchers(("/api/blog/list-blogs/**")).permitAll()
                         .requestMatchers(("/api/blog/my-blogs/**")).hasRole("STAFF")
-                        .requestMatchers("/api/blog-request/create", "/api/blog-request/my-requests/**").hasRole("STAFF")
+                        .requestMatchers("/api/blog-request/create", "/api/blog-request/my-requests/**").hasAnyRole("STAFF", "ADMIN")
                         .requestMatchers(("/api/blog-request/pending/**")).hasRole("ADMIN")
                         .requestMatchers("/api/medical-facility-stock/**").hasAnyRole("STAFF", "ADMIN")
                         .anyRequest().authenticated()
@@ -94,8 +94,6 @@ public class SecurityConfig {
                             response.getWriter().write("{\"error\":\"OAuth2 authentication failed\"}, " + exception.getMessage() + "}");
                         })
                 );
-
-
         return http.build();
     }
 }
