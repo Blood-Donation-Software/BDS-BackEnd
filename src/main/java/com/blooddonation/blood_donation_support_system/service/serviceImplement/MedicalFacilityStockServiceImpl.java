@@ -9,6 +9,7 @@ import com.blooddonation.blood_donation_support_system.entity.MedicalFacilitySto
 import com.blooddonation.blood_donation_support_system.enums.*;
 import com.blooddonation.blood_donation_support_system.mapper.BloodRequestMapper;
 import com.blooddonation.blood_donation_support_system.mapper.MedicalFacilityStockMapper;
+import com.blooddonation.blood_donation_support_system.mapper.ProfileMapper;
 import com.blooddonation.blood_donation_support_system.repository.BloodRequestRepository;
 import com.blooddonation.blood_donation_support_system.repository.BloodUnitRepository;
 import com.blooddonation.blood_donation_support_system.repository.MedicalFacilityStockRepository;
@@ -70,7 +71,7 @@ public class MedicalFacilityStockServiceImpl implements MedicalFacilityStockServ
         }
         if(!bloodRequestDto.isAutomation()) {
             bloodRequestDto.setStatus(BloodRequestStatus.FULFILLED);
-            bloodRequestRepository.save(BloodRequestMapper.toBloodRequestEntity(bloodRequestDto));
+            bloodRequestRepository.save(BloodRequestMapper.toBloodRequestEntity(bloodRequestDto, ProfileMapper.toEntity(bloodRequestDto.getProfile())));
         }
         return dataChanges;
     }

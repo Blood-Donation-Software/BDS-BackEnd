@@ -3,8 +3,10 @@ package com.blooddonation.blood_donation_support_system.dto;
 import com.blooddonation.blood_donation_support_system.enums.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -13,16 +15,18 @@ import java.util.List;
 @Builder
 public class BloodRequestDto {
     private Long id;
-    private String name;
-    private String phone;
-    private String address;
-    private String personalId;
+    private Long profileId;
+    private ProfileDto profile;
     private BloodRequestStatus status;
     private LocalDateTime createdTime;
     private LocalDateTime endTime;
+    private LocalDate requiredDate;
     private Urgency urgency;
     private BloodType bloodType;
     private List<ComponentRequestDto> componentRequests;
+    private Set<MedicalCondition> medicalConditions;
+    private String additionalMedicalInformation;
+    private String additionalNotes;
     private boolean isPregnant;
     private boolean isDisabled;
     private boolean haveServed;

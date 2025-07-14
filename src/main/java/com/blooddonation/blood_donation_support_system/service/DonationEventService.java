@@ -27,4 +27,6 @@ public interface DonationEventService {
     Page<DonationEventDto> getSortedPaginatedEventsByAccount(Long accountId, int pageNumber, int pageSize, String sortBy, boolean ascending);
 
     Page<DonationEventDto> getPaginatedEventsByDateRange(LocalDate start, LocalDate end, int pageNumber, int pageSize, String sortBy, boolean ascending);
+
+    List<DonationEventDto> getOngoingDonationEvents();
 }

@@ -7,7 +7,9 @@ import com.blooddonation.blood_donation_support_system.enums.BloodRequestStatus;
 import com.blooddonation.blood_donation_support_system.enums.ComponentType;
 import com.blooddonation.blood_donation_support_system.enums.Urgency;
 import com.blooddonation.blood_donation_support_system.mapper.BloodRequestMapper;
+import com.blooddonation.blood_donation_support_system.mapper.ProfileMapper;
 import com.blooddonation.blood_donation_support_system.repository.BloodRequestRepository;
+import com.blooddonation.blood_donation_support_system.repository.ProfileRepository;
 import com.blooddonation.blood_donation_support_system.service.IBloodRequestService;
 import com.blooddonation.blood_donation_support_system.service.MedicalFacilityStockService;
 import jakarta.annotation.PostConstruct;
@@ -26,6 +28,8 @@ import java.util.stream.Collectors;
 public class BloodRequestServiceImpl implements IBloodRequestService {
     @Autowired
     private BloodRequestRepository bloodRequestRepository;
+    @Autowired
+    private ProfileRepository profileRepository;
     @Autowired
     private MedicalFacilityStockService medicalFacilityStockService;
     @Autowired
@@ -66,7 +70,15 @@ public class BloodRequestServiceImpl implements IBloodRequestService {
             bloodRequestDto.setCreatedTime(LocalDateTime.now());
         }
         bloodRequestDto.setStatus(BloodRequestStatus.PENDING);
-        BloodRequest savedEntity = bloodRequestRepository.save(BloodRequestMapper.toBloodRequestEntity(bloodRequestDto));
+        Profile profile = null;
+        if(bloodRequestDto.getProfile() == null) {
+            profile = profileRepository.findById(bloodRequestDto.getProfileId())
+                    .orElseThrow(() -> new EntityNotFoundException("Profile not found with ID: " + bloodRequestDto.getProfileId()));
+        } else {
+            profile = ProfileMapper.toEntity(profileService.saveProfile(bloodRequestDto.getProfile()));
+        }
+
+        BloodRequest savedEntity = bloodRequestRepository.save(BloodRequestMapper.toBloodRequestEntity(bloodRequestDto, profile));
         BloodRequestDto bloodRequest = BloodRequestMapper.toBloodRequestDto(savedEntity);
         if(!bloodRequest.isAutomation()) return bloodRequest;
         int newPriority = bloodRequest.calculatePriority();
@@ -100,13 +112,6 @@ public class BloodRequestServiceImpl implements IBloodRequestService {
         return bloodRequest;
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<BloodRequestDto> findBloodRequestByName(String name) {
-        List<BloodRequest> bloodRequests = bloodRequestRepository.findAllByName(name);
-        return bloodRequests.stream().map(BloodRequestMapper::toBloodRequestDto)
-                .collect(Collectors.toList());
-    }
 
     @Override
     @Transactional(readOnly = true)
@@ -135,8 +140,12 @@ public class BloodRequestServiceImpl implements IBloodRequestService {
         bloodUnitDto.setProfileId(profileDto.getId());
         bloodRequestDto.getBloodUnits().add(bloodUnitDto);
 
+        // Get the profile for the blood request
+        Profile profile = profileRepository.findById(bloodRequestDto.getProfileId())
+                .orElseThrow(() -> new EntityNotFoundException("Profile not found with ID: " + bloodRequestDto.getProfileId()));
+
         BloodRequest bloodRequest = bloodRequestRepository.save(
-                BloodRequestMapper.toBloodRequestEntity(bloodRequestDto)
+                BloodRequestMapper.toBloodRequestEntity(bloodRequestDto, profile)
         );
         return BloodRequestMapper.toBloodRequestDto(bloodRequest);
     }
@@ -146,7 +155,12 @@ public class BloodRequestServiceImpl implements IBloodRequestService {
         bloodRequestDto.setStatus(BloodRequestStatus.FULFILLED);
         bloodRequestQueue.remove(bloodRequestDto);
         pendingRequestQueue.remove(bloodRequestDto);
-        BloodRequest bloodRequest = bloodRequestRepository.save(BloodRequestMapper.toBloodRequestEntity(bloodRequestDto));
+        
+        // Get the profile for the blood request
+        Profile profile = profileRepository.findById(bloodRequestDto.getProfileId())
+                .orElseThrow(() -> new EntityNotFoundException("Profile not found with ID: " + bloodRequestDto.getProfileId()));
+        
+        BloodRequest bloodRequest = bloodRequestRepository.save(BloodRequestMapper.toBloodRequestEntity(bloodRequestDto, profile));
         return BloodRequestMapper.toBloodRequestDto(bloodRequest);
     }
 
@@ -232,12 +246,16 @@ public class BloodRequestServiceImpl implements IBloodRequestService {
     }
 
     private int getDelayMinutes(Urgency urgency) {
-        return switch (urgency) {
-            case LOW -> LOW_URGENCY_DELAY;
-            case MEDIUM -> MEDIUM_URGENCY_DELAY;
-            case HIGH -> HIGH_URGENCY_DELAY;
-            default -> throw new IllegalArgumentException("Unknown urgency");
-        };
+        switch (urgency) {
+            case LOW:
+                return LOW_URGENCY_DELAY;
+            case MEDIUM:
+                return MEDIUM_URGENCY_DELAY;
+            case HIGH:
+                return HIGH_URGENCY_DELAY;
+            default:
+                throw new IllegalArgumentException("Unknown urgency");
+        }
     }
 
     @Transactional

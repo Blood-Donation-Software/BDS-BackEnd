@@ -91,7 +91,6 @@ public class ProfileController {
         }
     }
 
-    // Show the specific account
     @GetMapping("/list-profile/{profileId}")
     public ResponseEntity<Object> getProfileById(@PathVariable Long profileId) {
         try {
@@ -104,7 +103,21 @@ public class ProfileController {
                     .body("An error occurred while retrieving user profile by email");
         }
     }
-
+  
+    @GetMapping("/search-by-personal-id")
+    public ResponseEntity<Object> getProfileByPersonalId(@RequestParam String personalId) {
+        try {
+            List<ProfileDto> profileDtos = profileService.getProfileByPersonalId(personalId);
+            return ResponseEntity.ok(profileDtos);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("An error occurred while retrieving user profile by personal ID");
+            }
+    }
+  
+  
     @PostMapping("/list-profile/{profileId}/update")
     public ResponseEntity<Object> updateProfile(@PathVariable Long profileId,
                                                 @Valid @RequestBody ProfileDto profileDto) {
@@ -115,9 +128,11 @@ public class ProfileController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("An error occurred while updating user information");
-        }
+              .body("An error occurred while retrieving user profile by personal ID");
+              .body("An error occurred while updating user information");
+            }
     }
+
 
     // Show a list of all profiles
     @GetMapping("/list-profile")
@@ -147,6 +162,29 @@ public class ProfileController {
         }
     }
 
+    // Search profiles for blood request
+    @GetMapping("/search")
+    public ResponseEntity<List<ProfileDto>> searchProfiles(@RequestParam String q) {
+        try {
+            List<ProfileDto> profiles = profileService.searchProfiles(q);
+            return ResponseEntity.ok(profiles);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    // Get profile by ID
+    @GetMapping("/{id}")
+    public ResponseEntity<ProfileDto> getProfileById(@PathVariable Long id) {
+        try {
+            ProfileDto profile = profileService.getProfileById(id);
+            return ResponseEntity.ok(profile);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
     // Show history of specific profile
     @GetMapping("/list-profile/profileId/{profileId}/history")
     public ResponseEntity<Page<UserDonationHistoryDto>> getHistoryByProfileId(
