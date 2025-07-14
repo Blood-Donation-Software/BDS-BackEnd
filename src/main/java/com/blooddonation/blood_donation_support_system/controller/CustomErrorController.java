@@ -27,12 +27,20 @@ public class CustomErrorController implements ErrorController {
         } else {
             // Provide default messages based on status code
             int statusCode = status != null ? Integer.parseInt(status.toString()) : 500;
-            message = switch (statusCode) {
-                case 404 -> "Resource not found: " + path;
-                case 403 -> "Access denied";
-                case 400 -> "Bad request";
-                default -> "An error occurred";
-            };
+            switch (statusCode) {
+                case 404:
+                    message = "Resource not found: " + path;
+                    break;
+                case 403:
+                    message = "Access denied";
+                    break;
+                case 400:
+                    message = "Bad request";
+                    break;
+                default:
+                    message = "An error occurred";
+                    break;
+            }
         }
 
         Map<String, Object> body = new HashMap<>();

@@ -41,7 +41,6 @@ public class DonationEventMapper {
                 .status(event.getStatus())
                 .donationType(event.getDonationType())
                 .accountId(event.getAccount() != null ? event.getAccount().getId() : null)
-                .organizer(event.getOrganizer() != null ? OrganizerMapper.toDto(event.getOrganizer()) : null)
                 .createdDate(LocalDate.now())
                 .timeSlotDtos(slots) // Set the timeSlotDtos here
                 .build();

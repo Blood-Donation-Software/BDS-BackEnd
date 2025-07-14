@@ -151,6 +151,12 @@ public class DonationEventController {
         return ResponseEntity.ok(donationEventService.getEventDonors(eventId, timeSlotId, page, size, sortBy, ascending));
     }
 
+    @GetMapping("/list-donation/on-going")
+    public ResponseEntity<List<DonationEventDto>> getOngoingDonationEvents() {
+        List<DonationEventDto> ongoingEvents = donationEventService.getOngoingDonationEvents();
+        return ResponseEntity.ok(ongoingEvents);
+    }
+
     @GetMapping("/list-donation/{eventId}/donors")
     public ResponseEntity<Page<ProfileDto>> getEventDonors(@PathVariable Long eventId,
                                                            @RequestParam(defaultValue = "0") int page,

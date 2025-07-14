@@ -44,19 +44,24 @@ public class ProfileDto {
     private Gender gender;
 
     @Past(message = "Date of birth must be in the past")
-    @JsonFormat(pattern = "dd-MM-yyyy")
+//    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate dateOfBirth;
 
     @PastOrPresent(message = "Last donation date cannot be in the future")
-    @JsonFormat(pattern = "dd-MM-yyyy")
+//    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate lastDonationDate;
 
-    @JsonFormat(pattern = "dd-MM-yyyy")
+//    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate nextEligibleDonationDate;
 
-    @NotNull(message = "Status is required")
+//    @NotNull(message = "Status is required")
     private ProfileStatus status;
 
     @Pattern(regexp = "^[0-9]{12}$", message = "Personal ID must be 12 digits")
     private String personalId;
+    
+    // Distance fields (optional, used when filtering by distance)
+    private Double distanceInKilometers;
+    private String distanceText;
+    private String durationText;
 }
