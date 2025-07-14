@@ -2,6 +2,7 @@ package com.blooddonation.blood_donation_support_system.service.serviceImplement
 
 import com.blooddonation.blood_donation_support_system.dto.AccountDto;
 import com.blooddonation.blood_donation_support_system.entity.Account;
+import com.blooddonation.blood_donation_support_system.entity.Profile;
 import com.blooddonation.blood_donation_support_system.enums.AccountStatus;
 import com.blooddonation.blood_donation_support_system.enums.Role;
 import com.blooddonation.blood_donation_support_system.mapper.AccountMapper;
@@ -24,6 +25,9 @@ public class AccountServiceImpl implements AccountService {
     private AccountRepository accountRepository;
     @Autowired
     private UserValidator validator;
+    @Autowired
+    private AccountMapper accountMapper;
+
     public AccountDto updateUserPassword(AccountDto accountDto, String oldPassword, String newPassword) {
         Account account = validator.getUserOrThrow(accountDto.getId());
         validator.validateUpdatePassword(oldPassword, account.getPassword(), newPassword);
@@ -52,6 +56,16 @@ public class AccountServiceImpl implements AccountService {
         }
         Account savedAccount = accountRepository.save(account);
         return AccountMapper.toDto(savedAccount);
+    }
+
+    public String createAccount(AccountDto accountDto) {
+        if (accountRepository.findByEmail(accountDto.getEmail()) != null) {
+            throw new RuntimeException("Email already exists");
+        }
+        accountDto.setPassword(passwordEncoder.encode(accountDto.getPassword()));
+        Account account = AccountMapper.toEntity(accountDto,accountDto.getRole());
+        accountRepository.save(account);
+        return "Account created successfully";
     }
 
     public AccountDto getAccountById(Long accountId) {

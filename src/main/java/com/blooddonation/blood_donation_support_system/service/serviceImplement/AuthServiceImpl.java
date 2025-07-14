@@ -142,7 +142,7 @@ public class AuthServiceImpl implements AuthService {
         return "New password reset code sent";
     }
 
-    public String resetPassword(String resetCode, String newPassword) {
+    public String verifyPasswordReset(String resetCode) {
         if (!codeExpiration.containsKey(resetCode)) {
             return "Reset code invalid";
         }
@@ -153,7 +153,11 @@ public class AuthServiceImpl implements AuthService {
         if (tempUser == null) {
             return "Invalid reset code";
         }
+        return "Verify password reset code successfully";
+    }
 
+    public String resetPassword(String resetCode ,String newPassword) {
+        TempUserDto tempUser = temporaryUsers.get(resetCode);
         Account account = tempUser.getAccount();
         account.setPassword(passwordEncoder.encode(newPassword));
         accountRepository.save(account);
