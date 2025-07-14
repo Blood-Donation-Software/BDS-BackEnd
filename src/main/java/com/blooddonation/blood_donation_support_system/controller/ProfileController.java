@@ -128,7 +128,6 @@ public class ProfileController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-              .body("An error occurred while retrieving user profile by personal ID");
               .body("An error occurred while updating user information");
             }
     }
@@ -174,17 +173,17 @@ public class ProfileController {
     }
 
     // Get profile by ID
-    @GetMapping("/{id}")
-    public ResponseEntity<ProfileDto> getProfileById(@PathVariable Long id) {
-        try {
-            ProfileDto profile = profileService.getProfileById(id);
-            return ResponseEntity.ok(profile);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
-    }
+//    @GetMapping("/{id}")
+//    public ResponseEntity<ProfileDto> getProfileById(@PathVariable Long id) {
+//        try {
+//            ProfileDto profile = profileService.getProfileById(id);
+//            return ResponseEntity.ok(profile);
+//        } catch (RuntimeException e) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+//        }
+//    }
     // Show history of specific profile
     @GetMapping("/list-profile/profileId/{profileId}/history")
     public ResponseEntity<Page<UserDonationHistoryDto>> getHistoryByProfileId(

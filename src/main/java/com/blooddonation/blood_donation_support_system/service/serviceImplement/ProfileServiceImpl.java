@@ -108,11 +108,11 @@ public class ProfileServiceImpl implements ProfileService {
         return ProfileMapper.toDto(updatedProfile);
     }
 
-    public ProfileDto getProfileByPersonalId(String personalId) {
-        Profile profile = profileRepository.findByPersonalId(personalId)
-                .orElseThrow(() -> new RuntimeException("Profile not found with personal ID: " + personalId));
-        return ProfileMapper.toDto(profile);
-    }
+//    public ProfileDto getProfileByPersonalId(String personalId) {
+//        Profile profile = profileRepository.findByPersonalId(personalId)
+//                .orElseThrow(() -> new RuntimeException("Profile not found with personal ID: " + personalId));
+//        return ProfileMapper.toDto(profile);
+//    }
   
 
     public ProfileDto saveProfile(ProfileDto profileDto) {

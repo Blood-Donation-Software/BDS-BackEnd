@@ -23,7 +23,8 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Service
-public class CheckinTokenServiceImpl implements CheckinTokenService {    @Autowired
+public class CheckinTokenServiceImpl implements CheckinTokenService {
+    @Autowired
     private CheckinTokenRepository checkinTokenRepository;
     @Autowired
     private AccountRepository accountRepository;
@@ -52,6 +53,16 @@ public class CheckinTokenServiceImpl implements CheckinTokenService {    @Autowi
         checkinTokenRepository.delete(checkinToken);
     }
     @Override
+    public ProfileWithFormResponseDto checkinInfoWithPersonalId(String personalId, Long eventId) {
+        DonationEvent donationEvent = validator.getEventOrThrow(eventId);
+        Profile profile = profileRepository.findByPersonalId(personalId)
+                .orElseThrow(() -> new RuntimeException("Invalid personal id"));
+        EventRegistration eventRegistration = validator.getRegistrationOrThrow(profile.getPersonalId(), donationEvent);
+        String jsonForm = eventRegistration.getJsonForm();
+        return new ProfileWithFormResponseDto(ProfileMapper.toDto(profile), jsonForm, eventRegistration.getStatus());
+    }
+
+    @Override
     @Transactional
     public ProfileWithFormResponseDto getProfileFromToken(String token, String email, Long eventId) {
         DonationEvent donationEvent = validator.getEventOrThrow(eventId);
@@ -65,8 +76,9 @@ public class CheckinTokenServiceImpl implements CheckinTokenService {    @Autowi
         String jsonForm = eventRegistration.getJsonForm();
         deleteToken(token);
         return new ProfileWithFormResponseDto(ProfileMapper.toDto(profile), jsonForm, eventRegistration.getStatus());// Convert to DTO
-    }    @Override
-    public String generateTokenForUser(Long eventId, String email) {
+    }
+    @Override
+    public String getTokenForUser(Long eventId, String email) {
 
         DonationEvent donationEvent = validator.getEventOrThrow(eventId);
         
