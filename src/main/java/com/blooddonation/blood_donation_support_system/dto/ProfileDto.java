@@ -59,9 +59,4 @@ public class ProfileDto {
 
     @Pattern(regexp = "^[0-9]{12}$", message = "Personal ID must be 12 digits")
     private String personalId;
-    
-    // Distance fields (optional, used when filtering by distance)
-    private Double distanceInKilometers;
-    private String distanceText;
-    private String durationText;
 }

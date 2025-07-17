@@ -32,21 +32,22 @@ public class GoogleMapsService {
     private RestTemplate restTemplate;
     
     public GoogleMapsDistanceResponse calculateDistance(Profile profile) {
-        validateApiKey();
-        
-        String origin = buildProfileAddressForGoogleMaps(profile);
-        String destination = buildMedicalFacilityAddress();
+//        try {
+            validateApiKey();
+            
+            String origin = buildProfileAddress(profile);
+            String destination = buildMedicalFacilityAddress();
 
-        String url = UriComponentsBuilder.fromUriString("https://maps.googleapis.com/maps/api/distancematrix/json")
-                .queryParam("origins", origin)
-                .queryParam("destinations", destination)
-                .queryParam("key", apiKey)
-                .queryParam("mode", "driving")
-                .queryParam("language", "en")
-                .queryParam("units", "metric")
-                .build()
-                .encode()
-                .toUriString();
+            String url = UriComponentsBuilder.fromUriString("https://maps.googleapis.com/maps/api/distancematrix/json")
+                    .queryParam("origins", origin)
+                    .queryParam("destinations", destination)
+                    .queryParam("key", apiKey)
+                    .queryParam("mode", "driving")
+                    .queryParam("language", "en")
+                    .queryParam("units", "metric")
+                    .build()
+                    .encode() // This ensures proper URL encoding
+                    .toUriString();
 //            String url = UriComponentsBuilder.fromUriString("https://maps.googleapis.com/maps/api/distancematrix/json")
 //                    .queryParam("origins", origin)         // Do NOT pre-encode 'origin'
 //                    .queryParam("destinations", destination)
@@ -92,43 +93,33 @@ public class GoogleMapsService {
 //        }
     }
 
-    private String buildProfileAddressForGoogleMaps(Profile profile) {
+    private String buildProfileAddress(Profile profile) {
         StringBuilder address = new StringBuilder();
-        
-        // Format: street_address + ward + district + city + country
+
         if (profile.getAddress() != null && !profile.getAddress().trim().isEmpty()) {
-            String streetAddress = profile.getAddress().trim();
-            if (streetAddress.contains("/")) streetAddress = streetAddress.replaceFirst(" ", "+");
-            streetAddress = removeVietnameseDiacritics(streetAddress)
-                .replace(" ", "_");
-            address.append(streetAddress);
+            address.append(profile.getAddress().trim());
         }
-        
+
         if (profile.getWard() != null && !profile.getWard().trim().isEmpty()) {
-            if (address.length() > 0) address.append("+");
-            String ward = removeVietnameseDiacritics(profile.getWard().trim())
-                .replace(" ", "_");
-            address.append(ward);
+            if (address.length() > 0) address.append(", ");
+            address.append(profile.getWard().replaceFirst("(?i)phường\\s*", "").trim());
         }
-        
+
         if (profile.getDistrict() != null && !profile.getDistrict().trim().isEmpty()) {
-            if (address.length() > 0) address.append("+");
-            String district = removeVietnameseDiacritics(profile.getDistrict().trim())
-                .replace(" ", "_");
-            address.append(district);
+            if (address.length() > 0) address.append(", ");
+            address.append(profile.getDistrict().replaceFirst("(?i)quận\\s*", "").trim());
         }
-        
+
         if (profile.getCity() != null && !profile.getCity().trim().isEmpty()) {
-            if (address.length() > 0) address.append("+");
-            String city = removeVietnameseDiacritics(profile.getCity().trim())
-                .replace(" ", "_");
-            address.append(city);
+            if (address.length() > 0) address.append(", ");
+            address.append(profile.getCity().trim());
         }
-        
-        // Add country
-        if (address.length() > 0) address.append("+");
-        address.append("Vietnam");
-        
+
+        // Always add country
+        if (address.length() > 0) {
+            address.append(", Vietnam");
+        }
+
         return address.toString();
     }
 
@@ -136,36 +127,22 @@ public class GoogleMapsService {
     private String buildMedicalFacilityAddress() {
         StringBuilder address = new StringBuilder();
         
-        // Format: street_address + district + city + country
         if (streetAddress != null && !streetAddress.trim().isEmpty()) {
-            String street = removeVietnameseDiacritics(streetAddress.trim())
-                .replace("Duong", "Duong")
-                .replace("Hong Bang", "Hong_Bang")
-                .replace(" ", "_");
-            address.append(street);
+            address.append(streetAddress.trim());
         }
         
         if (district != null && !district.trim().isEmpty()) {
-            if (address.length() > 0) address.append("+");
-            String dist = removeVietnameseDiacritics(district.trim())
-                .replace("Quan ", "Quan_")
-                .replace("Quan", "Quan_")
-                .replace(" ", "_");
-            address.append(dist);
+            if (address.length() > 0) address.append(", ");
+            address.append(district.trim());
         }
         
         if (city != null && !city.trim().isEmpty()) {
-            if (address.length() > 0) address.append("+");
-            String cityName = removeVietnameseDiacritics(city.trim())
-                .replace("Thanh pho ", "Thanh_pho_")
-                .replace("Thanh pho", "Thanh_pho_")
-                .replace("Ho Chi Minh", "Ho_Chi_Minh")
-                .replace(" ", "_");
-            address.append(cityName);
+            if (address.length() > 0) address.append(", ");
+            address.append(city.trim());
         }
         
         if (state != null && !state.trim().isEmpty()) {
-            if (address.length() > 0) address.append("+");
+            if (address.length() > 0) address.append(", ");
             address.append(state.trim());
         }
         
@@ -181,43 +158,5 @@ public class GoogleMapsService {
             throw new RuntimeException("Google Maps API key is not configured. Please check SPRING_GOOGLE_MAPS_API_KEY environment variable.");
         }
         log.info("Google Maps API key is configured (length: {})", apiKey.length());
-    }
-    
-    private String removeVietnameseDiacritics(String text) {
-        if (text == null) return null;
-        
-        return text
-            // A variations
-            .replace("à", "a").replace("á", "a").replace("ả", "a").replace("ã", "a").replace("ạ", "a")
-            .replace("ă", "a").replace("ằ", "a").replace("ắ", "a").replace("ẳ", "a").replace("ẵ", "a").replace("ặ", "a")
-            .replace("â", "a").replace("ầ", "a").replace("ấ", "a").replace("ẩ", "a").replace("ẫ", "a").replace("ậ", "a")
-            .replace("À", "A").replace("Á", "A").replace("Ả", "A").replace("Ã", "A").replace("Ạ", "A")
-            .replace("Ă", "A").replace("Ằ", "A").replace("Ắ", "A").replace("Ẳ", "A").replace("Ẵ", "A").replace("Ặ", "A")
-            .replace("Â", "A").replace("Ầ", "A").replace("Ấ", "A").replace("Ẩ", "A").replace("Ẫ", "A").replace("Ậ", "A")
-            // E variations
-            .replace("è", "e").replace("é", "e").replace("ẻ", "e").replace("ẽ", "e").replace("ẹ", "e")
-            .replace("ê", "e").replace("ề", "e").replace("ế", "e").replace("ể", "e").replace("ễ", "e").replace("ệ", "e")
-            .replace("È", "E").replace("É", "E").replace("Ẻ", "E").replace("Ẽ", "E").replace("Ẹ", "E")
-            .replace("Ê", "E").replace("Ề", "E").replace("Ế", "E").replace("Ể", "E").replace("Ễ", "E").replace("Ệ", "E")
-            // I variations
-            .replace("ì", "i").replace("í", "i").replace("ỉ", "i").replace("ĩ", "i").replace("ị", "i")
-            .replace("Ì", "I").replace("Í", "I").replace("Ỉ", "I").replace("Ĩ", "I").replace("Ị", "I")
-            // O variations
-            .replace("ò", "o").replace("ó", "o").replace("ỏ", "o").replace("õ", "o").replace("ọ", "o")
-            .replace("ô", "o").replace("ồ", "o").replace("ố", "o").replace("ổ", "o").replace("ỗ", "o").replace("ộ", "o")
-            .replace("ơ", "o").replace("ờ", "o").replace("ớ", "o").replace("ở", "o").replace("ỡ", "o").replace("ợ", "o")
-            .replace("Ò", "O").replace("Ó", "O").replace("Ỏ", "O").replace("Õ", "O").replace("Ọ", "O")
-            .replace("Ô", "O").replace("Ồ", "O").replace("Ố", "O").replace("Ổ", "O").replace("Ỗ", "O").replace("Ộ", "O")
-            .replace("Ơ", "O").replace("Ờ", "O").replace("Ớ", "O").replace("Ở", "O").replace("Ỡ", "O").replace("Ợ", "O")
-            // U variations
-            .replace("ù", "u").replace("ú", "u").replace("ủ", "u").replace("ũ", "u").replace("ụ", "u")
-            .replace("ư", "u").replace("ừ", "u").replace("ứ", "u").replace("ử", "u").replace("ữ", "u").replace("ự", "u")
-            .replace("Ù", "U").replace("Ú", "U").replace("Ủ", "U").replace("Ũ", "U").replace("Ụ", "U")
-            .replace("Ư", "U").replace("Ừ", "U").replace("Ứ", "U").replace("Ử", "U").replace("Ữ", "U").replace("Ự", "U")
-            // Y variations
-            .replace("ỳ", "y").replace("ý", "y").replace("ỷ", "y").replace("ỹ", "y").replace("ỵ", "y")
-            .replace("Ỳ", "Y").replace("Ý", "Y").replace("Ỷ", "Y").replace("Ỹ", "Y").replace("Ỵ", "Y")
-            // D variations
-            .replace("đ", "d").replace("Đ", "D");
     }
 }

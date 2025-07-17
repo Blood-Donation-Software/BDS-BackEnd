@@ -58,8 +58,12 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
 
         // Generate CheckinToken
         CheckinTokenDto tokenDto = checkinTokenService.generateTokenForProfile(profile, donationEvent);
+
         // Generate QR code URL and image
+//        String qrUrl = String.format("http://localhost:8080/api/checkin/info/%d?checkinToken=%s", eventId, tokenDto.getToken());
         try {
+//            byte[] qrCode = qrCodeService.generateQRCode(qrUrl);
+//            registration.setQrCode(qrCode);
             CheckinToken checkinToken = CheckinTokenMapper.toEntity(tokenDto);
             registration.setCheckinToken(checkinToken);
             eventRegistrationRepository.save(registration);
@@ -76,8 +80,12 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
         Account member = validator.validateAndGetMemberAccount(personalId);
         EventRegistration registration = validator.validateAndGetExistingRegistration(member, event);
         if (registration != null) {
-            return "Member had already registered";
+            registration.setStatus(DonationRegistrationStatus.CHECKED_IN);
+//            registration.setProfileId(member.getProfile());
+            eventRegistrationRepository.save(registration);
+            return "Member checked in successfully";
         }
+
         validator.validateRegistrationEligibility(member, event, null);
         EventRegistration newRegistration = EventRegistrationMapper.createOfflineRegistration(member, event, jsonForm);
         event.setRegisteredMemberCount(event.getRegisteredMemberCount() - 1);

@@ -22,7 +22,8 @@ public class CheckinToken {
     @Column(unique = true, nullable = false)
     private String token;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "profile_id")
     private Profile profile;
 
     @JsonFormat(pattern = "dd-MM-yyyy")

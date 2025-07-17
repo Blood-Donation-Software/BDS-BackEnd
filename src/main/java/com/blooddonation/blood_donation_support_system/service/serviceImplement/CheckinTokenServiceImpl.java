@@ -12,7 +12,6 @@ import com.blooddonation.blood_donation_support_system.mapper.ProfileMapper;
 import com.blooddonation.blood_donation_support_system.repository.AccountRepository;
 import com.blooddonation.blood_donation_support_system.repository.CheckinTokenRepository;
 import com.blooddonation.blood_donation_support_system.repository.EventRegistrationRepository;
-import com.blooddonation.blood_donation_support_system.repository.ProfileRepository;
 import com.blooddonation.blood_donation_support_system.service.CheckinTokenService;
 import com.blooddonation.blood_donation_support_system.validator.DonationEventValidator;
 import jakarta.transaction.Transactional;
@@ -32,8 +31,6 @@ public class CheckinTokenServiceImpl implements CheckinTokenService {
     private EventRegistrationRepository eventRegistrationRepository;
     @Autowired
     private DonationEventValidator validator;
-    @Autowired
-    private ProfileRepository profileRepository;
 
     @Override
     public CheckinTokenDto generateTokenForProfile(Profile profile, DonationEvent donationEvent) {
@@ -46,21 +43,13 @@ public class CheckinTokenServiceImpl implements CheckinTokenService {
         checkinTokenRepository.save(token);
         return CheckinTokenMapper.toDto(token);
     }
-    @Transactional
-    public void deleteToken(String token) {
-        CheckinToken checkinToken = checkinTokenRepository.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Token not found"));
-        checkinTokenRepository.delete(checkinToken);
-    }
-    @Override
-    public ProfileWithFormResponseDto checkinInfoWithPersonalId(String personalId, Long eventId) {
-        DonationEvent donationEvent = validator.getEventOrThrow(eventId);
-        Profile profile = profileRepository.findByPersonalId(personalId)
-                .orElseThrow(() -> new RuntimeException("Invalid personal id"));
-        EventRegistration eventRegistration = validator.getRegistrationOrThrow(profile.getPersonalId(), donationEvent);
-        String jsonForm = eventRegistration.getJsonForm();
-        return new ProfileWithFormResponseDto(ProfileMapper.toDto(profile), jsonForm, eventRegistration.getStatus());
-    }
+
+//    @Transactional
+//    public void deleteToken(String token) {
+//        CheckinToken checkinToken = checkinTokenRepository.findByToken(token)
+//                .orElseThrow(() -> new RuntimeException("Token not found"));
+//        checkinTokenRepository.delete(checkinToken);
+//    }
 
     @Override
     @Transactional
@@ -74,12 +63,11 @@ public class CheckinTokenServiceImpl implements CheckinTokenService {
         }        Profile profile = checkinToken.getProfile();
         EventRegistration eventRegistration = validator.getRegistrationOrThrow(profile.getPersonalId(), donationEvent);
         String jsonForm = eventRegistration.getJsonForm();
-        deleteToken(token);
+//        deleteToken(token);
         return new ProfileWithFormResponseDto(ProfileMapper.toDto(profile), jsonForm, eventRegistration.getStatus());// Convert to DTO
     }
     @Override
-    public String getTokenForUser(Long eventId, String email) {
-
+    public String generateTokenForUser(Long eventId, String email) {
         DonationEvent donationEvent = validator.getEventOrThrow(eventId);
         
         // Find the account by email

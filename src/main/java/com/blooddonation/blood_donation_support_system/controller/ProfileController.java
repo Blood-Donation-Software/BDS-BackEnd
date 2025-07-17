@@ -44,25 +44,12 @@ public class ProfileController {
         }
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<Object> create(@Valid @RequestBody ProfileDto profileDto) {
-        try {
-            String result = profileService.createProfile(profileDto);
-            return ResponseEntity.ok(result);
-        } catch (RuntimeException e) {
-            return  ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("An error occurred while creating new profile");
-        }
-    }
-
     // Get User Profile Info
     @GetMapping()
     public ResponseEntity<Object> profile(@CookieValue(value = "jwt-token") String jwtToken) {
         try {
             AccountDto accountDto = jwtUtil.extractUser(jwtToken);
-            ProfileDto profileDto = profileService.getProfileByAccountId(accountDto.getId());
+            ProfileDto profileDto = profileService.getProfileById(accountDto.getId());
             return ResponseEntity.ok(profileDto);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -91,10 +78,11 @@ public class ProfileController {
         }
     }
 
-    @GetMapping("/list-profile/{profileId}")
-    public ResponseEntity<Object> getProfileById(@PathVariable Long profileId) {
+    // Show the specific account
+    @GetMapping("/list-profile/{accountId}")
+    public ResponseEntity<Object> getProfileByAccountId(@PathVariable Long accountId) {
         try {
-            ProfileDto profileDto = profileService.getProfileByProfileId(profileId);
+            ProfileDto profileDto = profileService.getProfileById(accountId);
             return ResponseEntity.ok(profileDto);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -103,7 +91,7 @@ public class ProfileController {
                     .body("An error occurred while retrieving user profile by email");
         }
     }
-  
+
     @GetMapping("/search-by-personal-id")
     public ResponseEntity<Object> getProfileByPersonalId(@RequestParam String personalId) {
         try {
@@ -113,25 +101,9 @@ public class ProfileController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("An error occurred while retrieving user profile by personal ID");
-            }
+                    .body("An error occurred while retrieving user profile by personal ID");
+        }
     }
-  
-  
-    @PostMapping("/list-profile/{profileId}/update")
-    public ResponseEntity<Object> updateProfile(@PathVariable Long profileId,
-                                                @Valid @RequestBody ProfileDto profileDto) {
-        try {
-        ProfileDto profileDtoUpdated = profileService.updateProfile(profileId, profileDto);
-        return ResponseEntity.ok(profileDtoUpdated);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-              .body("An error occurred while updating user information");
-            }
-    }
-
 
     // Show a list of all profiles
     @GetMapping("/list-profile")
@@ -144,7 +116,7 @@ public class ProfileController {
     }
 
     // Show history of specific account
-    @GetMapping("/list-profile/accountId/{accountId}/history")
+    @GetMapping("/list-profile/{accountId}/history")
     public ResponseEntity<Page<UserDonationHistoryDto>> getHistoryById(
             @PathVariable Long accountId,
             @RequestParam(defaultValue = "0") int page,
@@ -173,30 +145,13 @@ public class ProfileController {
     }
 
     // Get profile by ID
-//    @GetMapping("/{id}")
-//    public ResponseEntity<ProfileDto> getProfileById(@PathVariable Long id) {
-//        try {
-//            ProfileDto profile = profileService.getProfileById(id);
-//            return ResponseEntity.ok(profile);
-//        } catch (RuntimeException e) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-//        }
-//    }
-    // Show history of specific profile
-    @GetMapping("/list-profile/profileId/{profileId}/history")
-    public ResponseEntity<Page<UserDonationHistoryDto>> getHistoryByProfileId(
-            @PathVariable Long profileId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "true") boolean ascending) {
+    @GetMapping("/{id}")
+    public ResponseEntity<ProfileDto> getProfileById(@PathVariable Long id) {
         try {
-            Page<UserDonationHistoryDto> history = profileService.getDonationHistoryByProfileId(profileId, page, size, sortBy, ascending);
-            return ResponseEntity.ok(history);
+            ProfileDto profile = profileService.getProfileById(id);
+            return ResponseEntity.ok(profile);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }

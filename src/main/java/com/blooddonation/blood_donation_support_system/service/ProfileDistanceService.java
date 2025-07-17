@@ -2,18 +2,13 @@ package com.blooddonation.blood_donation_support_system.service;
 
 import com.blooddonation.blood_donation_support_system.dto.GoogleMapsDistanceResponse;
 import com.blooddonation.blood_donation_support_system.dto.ProfileDistanceDto;
-import com.blooddonation.blood_donation_support_system.dto.ProfileDto;
 import com.blooddonation.blood_donation_support_system.entity.Profile;
 import com.blooddonation.blood_donation_support_system.entity.ProfileDistance;
 import com.blooddonation.blood_donation_support_system.mapper.ProfileDistanceMapper;
-import com.blooddonation.blood_donation_support_system.mapper.ProfileMapper;
 import com.blooddonation.blood_donation_support_system.repository.ProfileDistanceRepository;
 import com.blooddonation.blood_donation_support_system.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -104,7 +99,7 @@ public class ProfileDistanceService {
             profileDistance.setDurationInSeconds(element.getDuration().getValue());
             profileDistance.setDurationText(element.getDuration().getText());
             profileDistance.setDistanceText(element.getDistance().getText());
-            profileDistance.setProfileAddress(buildProfileAddressForStorage(profile));
+            profileDistance.setProfileAddress(buildProfileAddress(profile));
             profileDistance.setMedicalFacilityAddress(googleMapsService.getMedicalFacilityAddress());
             
             profileDistance = profileDistanceRepository.save(profileDistance);
@@ -160,32 +155,6 @@ public class ProfileDistanceService {
                 .toList();
     }
     
-    // New methods that return ProfileDto with distance information for frontend pagination
-    public Page<ProfileDto> getProfilesWithinDistanceAsProfileDto(Double maxDistanceKm, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<ProfileDistance> profileDistances = profileDistanceRepository.findProfilesWithinDistancePageable(maxDistanceKm, pageable);
-        
-        return profileDistances.map(this::convertToProfileDtoWithDistance);
-    }
-    
-    public Page<ProfileDto> getAllProfilesOrderedByDistanceAsProfileDto(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<ProfileDistance> profileDistances = profileDistanceRepository.findAllOrderByDistanceAscPageable(pageable);
-        
-        return profileDistances.map(this::convertToProfileDtoWithDistance);
-    }
-    
-    private ProfileDto convertToProfileDtoWithDistance(ProfileDistance profileDistance) {
-        ProfileDto profileDto = ProfileMapper.toDto(profileDistance.getProfile());
-        
-        // Add distance information
-        profileDto.setDistanceInKilometers(profileDistance.getDistanceInKilometers());
-        profileDto.setDistanceText(profileDistance.getDistanceText());
-        profileDto.setDurationText(profileDistance.getDurationText());
-        
-        return profileDto;
-    }
-    
     @Transactional
     public void deleteDistanceByProfileId(Long profileId) {
         profileDistanceRepository.deleteByProfileId(profileId);
@@ -207,7 +176,7 @@ public class ProfileDistanceService {
                profile.getCity() == null || profile.getCity().trim().isEmpty();
     }
     
-    private String buildProfileAddressForStorage(Profile profile) {
+    private String buildProfileAddress(Profile profile) {
         StringBuilder address = new StringBuilder();
         
         if (profile.getAddress() != null && !profile.getAddress().trim().isEmpty()) {
@@ -229,6 +198,12 @@ public class ProfileDistanceService {
             address.append(profile.getCity().trim());
         }
         
-        return address.toString();
+        // Add country for better geocoding
+        String fullAddress = address.toString();
+        if (!fullAddress.toLowerCase().contains("vietnam")) {
+            fullAddress += ", Vietnam";
+        }
+        
+        return fullAddress;
     }
 }

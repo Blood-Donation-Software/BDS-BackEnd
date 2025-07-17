@@ -70,13 +70,7 @@ public class BloodRequestServiceImpl implements IBloodRequestService {
             bloodRequestDto.setCreatedTime(LocalDateTime.now());
         }
         bloodRequestDto.setStatus(BloodRequestStatus.PENDING);
-        Profile profile = null;
-        if(bloodRequestDto.getProfile() == null) {
-            profile = profileRepository.findById(bloodRequestDto.getProfileId())
-                    .orElseThrow(() -> new EntityNotFoundException("Profile not found with ID: " + bloodRequestDto.getProfileId()));
-        } else {
-            profile = ProfileMapper.toEntity(profileService.saveProfile(bloodRequestDto.getProfile()));
-        }
+        Profile profile = ProfileMapper.toEntity(profileService.saveProfile(bloodRequestDto.getProfile()));
 
         BloodRequest savedEntity = bloodRequestRepository.save(BloodRequestMapper.toBloodRequestEntity(bloodRequestDto, profile));
         BloodRequestDto bloodRequest = BloodRequestMapper.toBloodRequestDto(savedEntity);
