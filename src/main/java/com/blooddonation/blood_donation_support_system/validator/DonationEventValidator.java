@@ -72,6 +72,11 @@ public class DonationEventValidator {
                 .orElseThrow(() -> new RuntimeException(("Profile not found with id: " + profileId)));
     }
 
+    public Profile getProfileOrThrow(String personalId) {
+        return profileRepository.findByPersonalId(personalId)
+                .orElseThrow(() -> new RuntimeException(("Profile not found with id: " + personalId)));
+    }
+
     public EventRegistration getRegistrationOrThrow(String personalId, DonationEvent event) {
         Profile profile = profileRepository.findByPersonalId(personalId)
                 .orElseThrow(() -> new RuntimeException("Profile not found with personal ID: " + personalId));

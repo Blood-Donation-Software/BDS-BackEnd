@@ -7,6 +7,7 @@ import com.blooddonation.blood_donation_support_system.dto.ProfileDto;
 import com.blooddonation.blood_donation_support_system.entity.DonationEvent;
 import com.blooddonation.blood_donation_support_system.service.DonationEventRequestService;
 import com.blooddonation.blood_donation_support_system.service.DonationEventService;
+import com.blooddonation.blood_donation_support_system.service.MedicalFacilityStockService;
 import com.blooddonation.blood_donation_support_system.util.JwtUtil;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,8 @@ public class DonationEventController {
     private JwtUtil jwtUtil;
     @Autowired
     private DonationEventRequestService donationEventRequestService;
+    @Autowired
+    private MedicalFacilityStockService medicalFacilityStockService;
 
     @GetMapping("/list-donation/{eventId}")
     public ResponseEntity<Object> getEventDetails(@PathVariable Long eventId) {
@@ -131,7 +134,9 @@ public class DonationEventController {
             @Valid @RequestBody BulkBloodUnitRecordDto bulkRecordDto) {
         try {
             AccountDto staff = jwtUtil.extractUser(token);
-            return ResponseEntity.ok(donationEventService.recordMultipleBloodDonations(eventId, bulkRecordDto.getSingleBloodUnitRecords(), staff.getEmail()));
+            donationEventService.recordMultipleBloodDonations(eventId, bulkRecordDto.getSingleBloodUnitRecords(), staff.getEmail());
+            return ResponseEntity.ok(medicalFacilityStockService.addBloodUnitsToStockByEventId(eventId, staff.getEmail()));
+
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
