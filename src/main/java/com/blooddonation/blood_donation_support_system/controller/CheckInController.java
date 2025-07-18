@@ -74,6 +74,22 @@ public class CheckInController {
         }
     }
 
+    @GetMapping("/info/profile/{eventId}")
+    public ResponseEntity<Object> checkinInfoWithPersonalId(@PathVariable Long eventId,
+                                              @RequestParam String personal_id,
+                                              @CookieValue("jwt-token") String token) {
+        try {
+            AccountDto accountDto = jwtUtil.extractUser(token);
+            ProfileWithFormResponseDto profileDto = checkinTokenService.getProfileFromPersonalId(personal_id, accountDto.getEmail(), eventId);
+            return ResponseEntity.ok(profileDto);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while retrieving user information");
+        }
+    }
+
     @PostMapping("/action/{eventId}")
     public ResponseEntity<String> checkinToEvent(
             @PathVariable Long eventId,
