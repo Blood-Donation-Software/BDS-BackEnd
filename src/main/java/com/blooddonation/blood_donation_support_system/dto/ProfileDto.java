@@ -1,3 +1,4 @@
+
 package com.blooddonation.blood_donation_support_system.dto;
 
 import com.blooddonation.blood_donation_support_system.enums.BloodType;
@@ -51,12 +52,17 @@ public class ProfileDto {
 //    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate lastDonationDate;
 
-//    @JsonFormat(pattern = "dd-MM-yyyy")
+    //    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate nextEligibleDonationDate;
 
-//    @NotNull(message = "Status is required")
+    //    @NotNull(message = "Status is required")
     private ProfileStatus status;
 
     @Pattern(regexp = "^[0-9]{12}$", message = "Personal ID must be 12 digits")
     private String personalId;
+
+    // Distance fields (optional, used when filtering by distance)
+    private Double distanceInKilometers;
+    private String distanceText;
+    private String durationText;
 }

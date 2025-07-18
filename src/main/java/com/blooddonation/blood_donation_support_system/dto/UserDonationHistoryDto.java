@@ -22,4 +22,5 @@ public class UserDonationHistoryDto {
     private String donationName;
     private Long accountId;
     private Long profileId;
+    private Long donationId;
 }
