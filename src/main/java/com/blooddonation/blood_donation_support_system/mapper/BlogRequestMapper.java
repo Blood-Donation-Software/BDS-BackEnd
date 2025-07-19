@@ -45,7 +45,7 @@ public class BlogRequestMapper {
         if (blogDto == null) {
             return null;
         }
-
+        blogDto.setAuthorName(account.getProfile().getName());
         return BlogRequest.builder()
                 .id(blogDto.getId())
                 .account(account)

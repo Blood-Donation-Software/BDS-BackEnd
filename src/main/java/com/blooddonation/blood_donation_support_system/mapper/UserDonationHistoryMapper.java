@@ -42,7 +42,7 @@ public class UserDonationHistoryMapper {
                 .donationVolume(bloodUnit != null ? bloodUnit.getVolume() : null)
                 .accountId(account.getId())
                 .profileId(eventRegistration.getProfileId().getId())
-                .donationId(bloodUnit.getEvent().getId())
+                .donationId(eventRegistration.getEvent().getId())
                 .build();
     }
 

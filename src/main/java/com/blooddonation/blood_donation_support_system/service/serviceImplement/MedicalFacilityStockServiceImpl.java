@@ -155,19 +155,19 @@ public class MedicalFacilityStockServiceImpl implements MedicalFacilityStockServ
                 MedicalFacilityStockMapper.createComponent(
                         bloodType,
                         ComponentType.PLASMA,
-                        originalVolume * 0.55,
+                        (int) Math.floor(originalVolume * 0.55),
                         donationDate.plusYears(1)
                 ),
                 MedicalFacilityStockMapper.createComponent(
                         bloodType,
                         ComponentType.RED_BLOOD_CELLS,
-                        originalVolume * 0.44,
+                        (int) Math.floor(originalVolume * 0.44),
                         donationDate.plusDays(42)
                 ),
                 MedicalFacilityStockMapper.createComponent(
                         bloodType,
                         ComponentType.PLATELETS,
-                        originalVolume * 0.01,
+                        (int) Math.floor(originalVolume * 0.01),
                         donationDate.plusWeeks(1)
                 )
         );

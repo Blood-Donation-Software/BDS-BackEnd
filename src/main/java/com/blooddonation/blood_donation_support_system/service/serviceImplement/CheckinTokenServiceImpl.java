@@ -69,7 +69,7 @@ public class CheckinTokenServiceImpl implements CheckinTokenService {
         EventRegistration eventRegistration = validator.getRegistrationOrThrow(profile.getPersonalId(), donationEvent);
         String jsonForm = eventRegistration.getJsonForm();
 //        deleteToken(token);
-        return new ProfileWithFormResponseDto(ProfileMapper.toDto(profile), jsonForm, eventRegistration.getStatus());// Convert to DTO
+        return new ProfileWithFormResponseDto(ProfileMapper.toDto(profile), jsonForm, eventRegistration.getStatus(), checkinToken.getToken());// Convert to DTO
     }
 
     @Override
@@ -86,7 +86,7 @@ public class CheckinTokenServiceImpl implements CheckinTokenService {
         Profile profile = validator.getProfileOrThrow(personalId);
         String jsonForm = eventRegistration.getJsonForm();
 //        deleteToken(token);
-        return new ProfileWithFormResponseDto(ProfileMapper.toDto(profile), jsonForm, eventRegistration.getStatus());// Convert to DTO
+        return new ProfileWithFormResponseDto(ProfileMapper.toDto(profile), jsonForm, eventRegistration.getStatus(), checkinToken.getToken());// Convert to DTO
     }
 
     @Override

@@ -14,4 +14,5 @@ public class ProfileWithFormResponseDto {
     private ProfileDto profile;
     private String jsonForm;
     private DonationRegistrationStatus status;
+    private String checkinToken;
 }
