@@ -18,7 +18,6 @@ import com.blooddonation.blood_donation_support_system.validator.DonationEventVa
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Page;
@@ -26,7 +25,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -48,13 +46,30 @@ public class BlogRequestServiceImpl implements BlogRequestService {
     @Autowired
     private DonationEventValidator validator;
 
+    // Use environment variable UPLOAD_DIR if provided, otherwise default to 'uploads'
     private String uploadDir = System.getenv("UPLOAD_DIR");
 
     @PostConstruct
     public void init() {
-        File dir = new File(uploadDir);
-        if (!dir.exists()) {
-            dir.mkdirs();
+        if (uploadDir == null || uploadDir.isBlank()) {
+            uploadDir = "uploads"; // sensible default when env var isn't set
+            log.info("UPLOAD_DIR not set; defaulting to '{}'", uploadDir);
+        }
+
+        try {
+            // Ensure directory exists; store normalized path with forward slashes
+            Path dirPath = Paths.get(uploadDir);
+            Files.createDirectories(dirPath);
+            uploadDir = dirPath.toAbsolutePath().toString().replace('\\', '/');
+        } catch (Exception e) {
+            log.error("Failed to initialize upload directory '{}': {}", uploadDir, e.getMessage());
+            // fallback to relative 'uploads' folder
+            uploadDir = "uploads";
+            try {
+                Files.createDirectories(Paths.get(uploadDir));
+            } catch (IOException ex) {
+                log.error("Failed to create fallback uploads directory: {}", ex.getMessage());
+            }
         }
     }
 
@@ -64,13 +79,17 @@ public class BlogRequestServiceImpl implements BlogRequestService {
     public String createBlogRequest(BlogDto blogDto, MultipartFile thumbnail, String staffEmail) {
         Account staff = accountRepository.findByEmail(staffEmail);
         try {
-            String thumbnailName = UUID.randomUUID() + "_thumbnail";
-            Path thumbnailPath = Paths.get(uploadDir, thumbnailName);
-            Files.createDirectories(thumbnailPath.getParent());
+            if (thumbnail != null && !thumbnail.isEmpty()) {
+                String thumbnailName = UUID.randomUUID() + "_thumbnail_" + thumbnail.getOriginalFilename();
+                Path thumbnailPath = Paths.get(uploadDir, thumbnailName);
+                Files.createDirectories(thumbnailPath.getParent());
+                Files.copy(thumbnail.getInputStream(), thumbnailPath, StandardCopyOption.REPLACE_EXISTING);
 
-            Files.copy(thumbnail.getInputStream(), thumbnailPath, StandardCopyOption.REPLACE_EXISTING);
-
-            blogDto.setThumbnail(thumbnailPath.toString());
+                // store as uploadDir/filename with forward slashes for consistency
+                blogDto.setThumbnail(uploadDir + "/" + thumbnailName);
+            } else {
+                blogDto.setThumbnail(null);
+            }
 
             BlogRequest blogRequest = BlogRequestMapper.createBlog(blogDto, staff);
             blogRequestRepository.save(blogRequest);
@@ -94,8 +113,9 @@ public class BlogRequestServiceImpl implements BlogRequestService {
             if (thumbnail != null && !thumbnail.isEmpty()) {
                 String thumbnailName = UUID.randomUUID() + "_" + thumbnail.getOriginalFilename();
                 Path thumbnailPath = Paths.get(uploadDir, thumbnailName);
+                Files.createDirectories(thumbnailPath.getParent());
                 Files.copy(thumbnail.getInputStream(), thumbnailPath, StandardCopyOption.REPLACE_EXISTING);
-                blogDto.setThumbnail(uploadDir + thumbnailName);
+                blogDto.setThumbnail(uploadDir + "/" + thumbnailName);
             }
 
             BlogRequest blogRequest = BlogRequestMapper.updateBlog(blogDto, staff, blog);
@@ -120,7 +140,6 @@ public class BlogRequestServiceImpl implements BlogRequestService {
 
     public String verifyBlogRequest(Long requestId, String action) {
         BlogRequest blogRequest = validator.getBlogRequestOrThrow(requestId);
-        Blog blog = blogRequest.getBlog();
         if (!blogRequest.getStatus().equals(BlogRequestStatus.PENDING)) {
             return "Blog request has already been verified";
         }
@@ -222,7 +241,8 @@ public class BlogRequestServiceImpl implements BlogRequestService {
         if (content == null) return new HashSet<>();
 
         Set<String> urls = new HashSet<>();
-        Pattern pattern = Pattern.compile( uploadDir + "/[^\\s\"']+\\.(jpg|jpeg|png|gif)");
+        // Use Pattern.quote to safely handle any path characters and match stored image references like uploadDir/filename.jpg
+        Pattern pattern = Pattern.compile(Pattern.quote(uploadDir) + "/[^\\s\"']+\\.(jpg|jpeg|png|gif)");
         Matcher matcher = pattern.matcher(content);
 
         while (matcher.find()) {
@@ -233,8 +253,10 @@ public class BlogRequestServiceImpl implements BlogRequestService {
 
     private void deleteFile(String filePath) {
         try {
-            Path path = Paths.get(uploadDir, filePath.replace(uploadDir, ""));
-            Files.deleteIfExists(path);
+            // Determine filename portion and delete from uploadDir to avoid accidental deletion of other locations
+            String fileName = Paths.get(filePath).getFileName().toString();
+            Path path = Paths.get(uploadDir, fileName);
+             Files.deleteIfExists(path);
         } catch (IOException e) {
             log.warn("Failed to delete file: " + filePath, e);
         }
